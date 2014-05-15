@@ -68,7 +68,11 @@ namespace RegexTesting
             //string pattern = @"\btest\b";
             //string pattern = @"\b(test)\b";
             //string pattern = @"test";
-            string pattern = @"(?=.*\+=)(?!.*new)";
+            //string pattern = @"(?=.*\+=)(?!.*new)";//working
+            string pattern = @"(?=\+=)(?!new)";
+            //string pattern = @"(?!new)(?=\+=)";
+
+
             Regex rgx = new Regex(pattern, RegexOptions.IgnoreCase);
             
 
