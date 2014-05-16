@@ -48,18 +48,25 @@ almost any character(not line breaks) = "."
 literal - cat, dog, etc
 special characters(12) - " \ ^ $ . | ? * + ( ) [ { "
 
+greedy
+eager
+zero-length token
+
 The backslash in combination with a literal character can create a regex token with a special meaning. E.g. \d is a shorthand that matches a single digit from 0 to 9.
 
 //Special Characters
 Escaping a single metacharacter with a backslash works in all regular expression flavors. Many flavors also support the \Q…\E escape sequence. All the characters between the \Q and the \E are interpreted as literal characters. E.g. \Q*\d+*\E matches the literal text *\d+*.\
 
+
 //Character Classes
 With a "character class", also called "character set", you can tell the regex engine to match only one out of several characters. Simply place the characters you want to match between square brackets. If you want to match an a or an e, use [ae]. You could use this in gr[ae]y to match either gray or grey.
 
-Typing a caret after the opening square bracket negates the character class. The result is that the character class matches any character that is not in the character class.  [^0-9\r\n] matches any character that is not a digit or a line break.
+Typing a caret after the opening square bracket negates the character class. The result is that the character class matches any character that is not in the character class.  
+[^0-9\r\n] matches any character that is not a digit or a line break.
 
 Both [-x] and [x-] match an x or a hyphen. 
 [^-x] and [^x-] match any character thas is not an x or a hyphen.
+
 
 //Character Class Subtraction
 Character class subtraction makes it easy to match any single character present in one list (the character class), but not present in another list (the subtracted class). The syntax for this is [class-[subtract]].
@@ -67,12 +74,17 @@ The character class [a-z-[aeiuo]] matches a single letter that is not a vowel.
 
 Since you can use the full character class syntax within the subtracted character class, you can subtract a class from the class being subtracted. [0-9-[0-6-[0-3]]] first subtracts 0-3 from 0-6, yielding [0-9-[4-6]], or [0-37-9], which matches any character in the string 0123789.
 
+
 //Shorthand Character Classes
 [^\d\s]   matches any character that is neither a digit nor whitespace. It matches x, but not 8. 
-[\D\S]     matches any character that is either not a digit, or is not whitespace. Because all digits are not whitespace, and all whitespace characters are not digits, [\D\S] matches any character; digit, whitespace, or otherwise.  You can activate single-line mode by adding an s after the regex code, like this: m/^regex$/s;.
+[\D\S]     matches any character that is either not a digit, or is not whitespace. Because all digits are not whitespace, and all whitespace characters are not digits, [\D\S] matches any character; digit, whitespace, or otherwise. 
+
 
 //Dot
+ You can activate single-line mode by adding an s after the regex code, like this: m/^regex$/s;.
+ 
 In Perl, the mode where the dot also matches line breaks is called "single-line mode". Other languages and regex libraries have adopted Perl's terminology. When using the regex classes of the .NET framework, you activate this mode by specifying RegexOptions.Singleline, such as in Regex.Match("string", "regex", RegexOptions.Singleline).
+
 
 //Anchors
  The caret ^ matches the position before the first character in the string.
@@ -86,12 +98,88 @@ In Perl, the mode where the dot also matches line breaks is called "single-line 
 Let's see what happens when we try to match ^4$ to 749\n486\n4 (where \n represents a newline character) in multi-line mode.
 only the last 4 matches
 
+
 //Word Boundaries
  \b matches before and after an alphanumeric sequence
  \b4\b  This regex does not match "44 sheets of a4"
  \B is the negated version of \b. \B matches at every position where \b does not. Effectively, \B matches at any position between two word characters as well as at any position between two non-word characters.
  \bis\b  "This island is beautiful"  only is is selected
  
+ 
+//Alternation
+If you want to search for the literal text cat or dog, separate both options with a vertical bar or pipe symbol: cat|dog. If you want more options, simply expand the list: cat|dog|mouse|fish.
+If we want to improve the first example to match whole words only, we would need to use \b(cat|dog)\b.
+
+ If we use GetValue|Get|SetValue|Set, SetValue is attempted before Set, and the engine matches the entire string. We could also combine the four options into two and use the question mark to make part of them optional: Get(Value)?|Set(Value)?. Because the question mark is greedy, SetValue is be attempted before Set.
+
+ 
+//Optional Items
+The question mark makes the preceding token in the regular expression optional. colou?r matches both colour and color. The question mark is called a quantifier.
+You can make several tokens optional by grouping them together using parentheses, and placing the question mark after the closing parenthesis. E.g.: Nov(ember)? matches Nov and November.
+You can write a regular expression that matches many alternatives by including more than one question mark. Feb(ruary)? 23(rd)? matches February 23rd, February 23, Feb 23rd and Feb 23.
+
+
+//Repetition (quantification)
+The asterisk or star tells the engine to attempt to match the preceding token zero or more times. The plus tells the engine to attempt to match the preceding token once or more.
+<[A-Za-z][A-Za-z0-9]*> matches an HTML tag without any attributes. The angle brackets are literals. The first character class matches a letter. The second character class matches a letter or digit. The star repeats the second character class. Because we used the star, it's OK if the second character class matches nothing.
+I could also have used <[A-Za-z0-9]+>. I did not, because this regex would match <1>, which is not a valid HTML tag.
+
+There's an additional quantifier that allows you to specify how many times a token can be repeated. The syntax is {min,max}, where min is zero or a positive integer number indicating the minimum number of matches, and max is an integer equal to or greater than min indicating the maximum number of matches. If the comma is present but max is omitted, the maximum number of matches is infinite. So {0,1} is the same as ?, {0,} is the same as *, and {1,} is the same as +. Omitting both the comma and max tells the engine to repeat the token exactly min times.
+
+You could use \b[1-9][0-9]{3}\b to match a number between 1000 and 9999. \b[1-9][0-9]{2,4}\b matches a number between 100 and 99999.
+
+<.+>   "This is a <EM>first</EM> test"  returns "<EM>first</EM>"
+The quick fix to this problem is to make the plus lazy instead of greedy. Lazy quantifiers are sometimes also called "ungreedy" or "reluctant". You can do that by putting a question mark behind the plus in the regex. You can do the same with the star, the curly braces and the question mark itself. So our example becomes <.+?>.
+
+
+//Grouping & Capturing
+By placing part of a regular expression inside round brackets or parentheses, you can group that part of the regular expression together. This allows you to apply a quantifier to the entire group or to restrict alternation to part of the regex.
+
+Only parentheses can be used for grouping. Square brackets define a character class, and curly braces are used by a quantifier with specific limits.
+
+Besides grouping part of a regular expression together, parentheses also create a numbered capturing group. It stores the part of the string matched by the part of the regular expression inside the parentheses.
+
+The regex Set(Value)? matches Set or SetValue. In the first case, the first (and only) capturing group remains empty. In the second case, the first capturing group matches Value.
+
+If you do not need the group to capture its match, you can optimize this regular expression into Set(?:Value)?. The question mark and the colon after the opening parenthesis are the syntax that creates a non-capturing group. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
