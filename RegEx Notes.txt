@@ -1,4 +1,4 @@
-\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b
+ \b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b
 "[A-Z0-9._%+-]" - a series of letters, digits, dots, underscores, percentage signs and hyphens
 "+" - followed by
 "@" - an at sign
@@ -78,8 +78,11 @@ In Perl, the mode where the dot also matches line breaks is called "single-line 
 Let's see what happens when we try to match ^4$ to 749\n486\n4 (where \n represents a newline character) in multi-line mode.
 only the last 4 matches
 
-
-
+ \b matches before and after an alphanumeric sequence
+ \b4\b  This regex does not match "44 sheets of a4"
+ \B is the negated version of \b. \B matches at every position where \b does not. Effectively, \B matches at any position between two word characters as well as at any position between two non-word characters.
+ \bis\b  "This island is beautiful"  only is is selected
+ 
 
 
 
