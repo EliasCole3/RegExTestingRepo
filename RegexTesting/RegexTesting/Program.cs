@@ -165,16 +165,18 @@ namespace Fabtrol.McKenzie.Tests.MSTests.Localization
 
             foreach (var filePath in filePathList)
             {
+                Regex rgx = new Regex(@"^(?=.*\+=)(?!.*new)(?!.*//.*)");
+
                 var lines = File.ReadAllLines(filePath)
-                   .Select(x => new { Line = x })
-                   .Where(x => x.Line.Contains("+="))
-                   .Where(x => !x.Line.Contains("//"))
-                   .Where(x => !x.Line.Contains("new"))
-                   .ToList();
+                    .Select(x => new { Line = x })
+                    .Where(d => rgx.IsMatch(d.Line))
+                    .ToList();
 
                 countOfFilteredLines += lines.Count;
                 if (lines.Count != 0)
                 {
+                    Console.WriteLine("Number of lines with incorrect event handler assignment: " + countOfFilteredLines);
+
                     foreach (var line in lines)
                     {
                         Console.WriteLine(line);
@@ -184,13 +186,9 @@ namespace Fabtrol.McKenzie.Tests.MSTests.Localization
                 }
             }
 
-            Console.WriteLine("number of designer files returned: " + filePathList.Count);
-            Console.WriteLine("Number of lines after being filtered by Ifs: " + countOfFilteredLines);
-
             //Assert.IsTrue(countOfFilteredLines == 0);
 
         }
-
     }
 }
 
