@@ -43,13 +43,17 @@ almost any character(not line breaks) = "."
 
 
 
+
+//from http://www.regular-expressions.info/tutorial.html
 literal - cat, dog, etc
 special characters(12) - " \ ^ $ . | ? * + ( ) [ { "
 
 The backslash in combination with a literal character can create a regex token with a special meaning. E.g. \d is a shorthand that matches a single digit from 0 to 9.
 
+//Special Characters
 Escaping a single metacharacter with a backslash works in all regular expression flavors. Many flavors also support the \Q…\E escape sequence. All the characters between the \Q and the \E are interpreted as literal characters. E.g. \Q*\d+*\E matches the literal text *\d+*.\
 
+//Character Classes
 With a "character class", also called "character set", you can tell the regex engine to match only one out of several characters. Simply place the characters you want to match between square brackets. If you want to match an a or an e, use [ae]. You could use this in gr[ae]y to match either gray or grey.
 
 Typing a caret after the opening square bracket negates the character class. The result is that the character class matches any character that is not in the character class.  [^0-9\r\n] matches any character that is not a digit or a line break.
@@ -57,16 +61,20 @@ Typing a caret after the opening square bracket negates the character class. The
 Both [-x] and [x-] match an x or a hyphen. 
 [^-x] and [^x-] match any character thas is not an x or a hyphen.
 
+//Character Class Subtraction
 Character class subtraction makes it easy to match any single character present in one list (the character class), but not present in another list (the subtracted class). The syntax for this is [class-[subtract]].
 The character class [a-z-[aeiuo]] matches a single letter that is not a vowel.
 
 Since you can use the full character class syntax within the subtracted character class, you can subtract a class from the class being subtracted. [0-9-[0-6-[0-3]]] first subtracts 0-3 from 0-6, yielding [0-9-[4-6]], or [0-37-9], which matches any character in the string 0123789.
 
+//Shorthand Character Classes
 [^\d\s]   matches any character that is neither a digit nor whitespace. It matches x, but not 8. 
 [\D\S]     matches any character that is either not a digit, or is not whitespace. Because all digits are not whitespace, and all whitespace characters are not digits, [\D\S] matches any character; digit, whitespace, or otherwise.  You can activate single-line mode by adding an s after the regex code, like this: m/^regex$/s;.
 
+//Dot
 In Perl, the mode where the dot also matches line breaks is called "single-line mode". Other languages and regex libraries have adopted Perl's terminology. When using the regex classes of the .NET framework, you activate this mode by specifying RegexOptions.Singleline, such as in Regex.Match("string", "regex", RegexOptions.Singleline).
 
+//Anchors
  The caret ^ matches the position before the first character in the string.
  Similarly, $ matches right after the last character in the string.
 
@@ -78,6 +86,7 @@ In Perl, the mode where the dot also matches line breaks is called "single-line 
 Let's see what happens when we try to match ^4$ to 749\n486\n4 (where \n represents a newline character) in multi-line mode.
 only the last 4 matches
 
+//Word Boundaries
  \b matches before and after an alphanumeric sequence
  \b4\b  This regex does not match "44 sheets of a4"
  \B is the negated version of \b. \B matches at every position where \b does not. Effectively, \B matches at any position between two word characters as well as at any position between two non-word characters.
